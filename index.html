@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#svg {position: relative; top: 20px; left: 20px;}
+</style>
+</head>
+
+<body>
+<label for="xdim">Number of columns:</label>
+<input type="text" id="xdim" name="xdim" value="6" size="1">
+<label for="ydim">, rows:</label>
+<input type="text" id="ydim" name="ydim" value="6"size="1">
+<input id="create_svg" type="button" value="Create"><br>
+<form id="operator_form">
+  <input type="radio" id="X" name="operator" value="X" checked>
+  <label for="X">X</label>
+  <input type="radio" id="Bp" name="operator" value="Bp">
+  <label for="Bp">Bp</label>
+  <input type="radio" id="X0" name="operator" value="X0">
+  <label for="X0">X0</label>
+  <input type="radio" id="X1" name="operator" value="X1">
+  <label for="X1">X1</label>
+</form>
+
+
+
+<script>
+var svgNS = "http://www.w3.org/2000/svg";
+function createCircle(x, y, id, opacity=1)
+{
+    var myCircle = document.createElementNS(svgNS,"circle");
+    myCircle.setAttributeNS(null,"id",id);
+    myCircle.setAttributeNS(null,"cx",x);
+    myCircle.setAttributeNS(null,"cy",y);
+    myCircle.setAttributeNS(null,"r",5);
+    myCircle.setAttributeNS(null,"fill","white");
+	myCircle.setAttributeNS(null,"fill-opacity",1);
+    myCircle.setAttributeNS(null,"stroke","black");
+	myCircle.setAttributeNS(null,"stroke-opacity",opacity);
+
+    document.getElementById("svg").appendChild(myCircle);
+}
+
+function createLine(x1, y1, x2, y2, id, opacity=1)
+{
+    var myLine = document.createElementNS(svgNS, "line");
+    myLine.setAttributeNS(null,"id",id);
+	myLine.setAttributeNS(null,"stroke-width",2);
+    myLine.setAttributeNS(null,"x1",x1);
+    myLine.setAttributeNS(null,"y1",y1);
+	myLine.setAttributeNS(null,"x2",x2);
+    myLine.setAttributeNS(null,"y2",y2);
+    myLine.setAttributeNS(null,"stroke","black");
+	myLine.setAttributeNS(null,"stroke-opacity",opacity);
+
+    document.getElementById("svg").appendChild(myLine);
+}
+function changeLine(elem)
+{
+	color = elem.getAttribute('stroke');
+	if (color == "black")
+	{elem.setAttribute('stroke', 'red');}
+	if (color == "red")
+	{elem.setAttribute('stroke', 'black');}
+}
+function changeCircle(elem)
+{
+	color = elem.getAttribute('stroke');
+	if (color == "black")
+	{elem.setAttribute('stroke', 'red');elem.setAttribute('fill', 'red');}
+	if (color == "red")
+	{elem.setAttribute('stroke', 'black');elem.setAttribute('fill', 'white');}
+}
+function svgClick(event)
+{
+	var rect = mySVG.getBoundingClientRect();
+	x_coord = event.clientX - rect.left - left_margin;
+	y_coord = event.clientY - rect.top - top_margin;
+	checked_radio = document.querySelector('input[name="operator"]:checked').value;
+	if (checked_radio == "Bp"){
+		x_box = ~~(x_coord/side_length);
+		y_box = ~~(y_coord/side_length);
+		changeCircle(document.getElementById("ch"+x_box+y_box));
+		changeCircle(document.getElementById("cv"+x_box+y_box));
+		changeLine(document.getElementById("lh"+x_box+y_box));
+		changeLine(document.getElementById("lv"+x_box+y_box));
+		if (x_box == 0){
+			changeCircle(document.getElementById("cv"+1+y_box));
+			changeCircle(document.getElementById("cve"+y_box));
+			changeLine(document.getElementById("lv"+1+y_box));
+			changeLine(document.getElementById("lve"+y_box));
+		}
+		else if (x_box == grid_x-1){
+			changeCircle(document.getElementById("cv"+0+y_box));
+			changeCircle(document.getElementById("cve"+y_box));
+			changeLine(document.getElementById("lv"+0+y_box));
+			changeLine(document.getElementById("lve"+y_box));
+		}
+		else{
+			next_x = x_box+1
+			changeCircle(document.getElementById("cv"+next_x+y_box));
+			changeLine(document.getElementById("lv"+next_x+y_box));
+		}
+		if (y_box == 0){
+			changeCircle(document.getElementById("ch"+x_box+1));
+			changeCircle(document.getElementById("che"+x_box));
+			changeLine(document.getElementById("lh"+x_box+1));
+			changeLine(document.getElementById("lhe"+x_box));
+		}
+		else if (y_box == grid_y-1){
+			changeCircle(document.getElementById("ch"+x_box+0));
+			changeCircle(document.getElementById("che"+x_box));
+			changeLine(document.getElementById("lh"+x_box+0));
+			changeLine(document.getElementById("lhe"+x_box));
+		}
+		else{
+			next_y = y_box+1
+			changeCircle(document.getElementById("ch"+x_box+next_y));
+			changeLine(document.getElementById("lh"+x_box+next_y));
+		}
+	}
+	if (checked_radio == "X0"){
+		y_line = Math.floor(y_coord/side_length+0.5);
+		if ((y_line==0) || (y_line==grid_y)){
+			for (let i = 0; i < grid_x; i++){
+				changeCircle(document.getElementById("ch"+i+0));
+				changeLine(document.getElementById("lh"+i+0));
+				changeCircle(document.getElementById("che"+i));
+				changeLine(document.getElementById("lhe"+i));
+			}
+		}
+		else{
+			for (let i = 0; i < grid_x; i++){
+				changeCircle(document.getElementById("ch"+i+y_line));
+				changeLine(document.getElementById("lh"+i+y_line));
+			}
+		}
+	}
+	if (checked_radio == "X1"){
+		x_line = Math.floor(x_coord/side_length+0.5);
+		if ((x_line==0) || (x_line==grid_x)){
+			for (let i = 0; i < grid_y; i++){
+				changeCircle(document.getElementById("cv"+0+i));
+				changeLine(document.getElementById("lv"+0+i));
+				changeCircle(document.getElementById("cve"+i));
+				changeLine(document.getElementById("lve"+i));
+			}
+		}
+		else{
+			for (let i = 0; i < grid_y; i++){
+				changeCircle(document.getElementById("cv"+x_line+i));
+				changeLine(document.getElementById("lv"+x_line+i));
+			}
+		}
+	}
+}
+function createSVG(x, y) {
+	top_margin = 10
+	left_margin = 10
+	side_length = 60
+	mySVG = document.createElementNS(svgNS, "svg");
+	mySVG.setAttributeNS(null,"id","svg");
+	mySVG.setAttributeNS(null,"width",x*side_length+2*left_margin);
+	mySVG.setAttributeNS(null,"height",y*side_length+2*top_margin);
+	document.body.appendChild(mySVG);
+	mySVG.addEventListener("click", svgClick);
+	
+	for (let i = 0; i < x; i++) {
+		for (let j = 0; j < y; j++) {
+			createLine(left_margin+side_length*i, top_margin+j*side_length, left_margin+side_length*(i+1), top_margin+j*side_length, "lh"+i+j);
+			createLine(left_margin+side_length*i, top_margin+j*side_length, left_margin+side_length*i, top_margin+(j+1)*side_length, "lv"+i+j);
+			createCircle(left_margin+side_length*(i+0.5), top_margin+j*side_length, "ch"+i+j);
+			createCircle(left_margin+side_length*i, top_margin+(j+0.5)*side_length, "cv"+i+j);
+		}
+	}
+	for (let i = 0; i < x; i++) {
+		createLine(left_margin+side_length*i, top_margin+y*side_length, left_margin+side_length*(i+1), top_margin+y*side_length, "lhe"+i, 0.5);
+		createCircle(left_margin+side_length*(i+0.5), top_margin+y*side_length, "che"+i, 0.5);
+	}
+	for (let j = 0; j < y; j++) {
+		createLine(left_margin+side_length*x, top_margin+j*side_length, left_margin+side_length*x, top_margin+(j+1)*side_length, "lve"+j, 0.5);
+		createCircle(left_margin+side_length*x, top_margin+(j+0.5)*side_length, "cve"+j, 0.5);
+	}
+}
+document.getElementById("create_svg").onclick = function(){
+grid_x = parseInt(document.getElementById("xdim").value);
+grid_y = parseInt(document.getElementById("ydim").value);
+createSVG(grid_x, grid_y);
+}
+</script>
+
+</body>
+
+</html>
